@@ -20,6 +20,8 @@ from posthog.utils import generate_short_id, patchable
 from prometheus_client import Counter, Gauge
 from sentry_sdk import set_tag
 
+import re
+
 QUERY_ERROR_COUNTER = Counter(
     "clickhouse_query_failure",
     "Query execution failure signal is dispatched when a query fails.",
@@ -224,6 +226,12 @@ def _prepare_query(
     clickhouse_driver at this moment in time decides based on the
     below predicate.
     """
+
+    # remove ON CLUSTER if it's there
+    print("before: ", query)
+    query = remove_on_cluster(query)
+    print("after: ", query)
+
     prepared_args: Any = QueryArgs
     if isinstance(args, list | tuple | types.GeneratorType):
         # If we get one of these it means we have an insert, let the clickhouse
@@ -293,3 +301,12 @@ def clickhouse_query_counter(query_counter):
     thread_local_storage.query_counter = query_counter
     yield
     thread_local_storage.query_counter = None
+
+def remove_on_cluster(sql):
+    return re.sub(
+        r'(.*?)\s+ON CLUSTER\s+((\'[^\']*\')|(\"[^\"]*\")|\S+)(.*)',
+        r'\1\5',
+        sql,
+        flags=re.IGNORECASE,
+        count=1
+    )

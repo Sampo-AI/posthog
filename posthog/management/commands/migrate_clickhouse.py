@@ -89,7 +89,8 @@ class Command(BaseCommand):
                 )
             print("Migrations done")
         else:
-            database.migrate(MIGRATIONS_PACKAGE_NAME, options["upto"], replicated=True)
+            # database.migrate(MIGRATIONS_PACKAGE_NAME, options["upto"], replicated=True)
+            database.migrate(MIGRATIONS_PACKAGE_NAME, options["upto"], replicated=False)
             print("✅ Migration successful")
 
     def get_migrations(self, database, upto):
@@ -104,4 +105,5 @@ class Command(BaseCommand):
                 break
 
     def get_applied_migrations(self, database):
-        return database._get_applied_migrations(MIGRATIONS_PACKAGE_NAME, replicated=True)
+        # return database._get_applied_migrations(MIGRATIONS_PACKAGE_NAME, replicated=True)
+        return database._get_applied_migrations(MIGRATIONS_PACKAGE_NAME, replicated=False)
