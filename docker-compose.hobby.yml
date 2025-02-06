@@ -50,6 +50,9 @@ services:
             - ./posthog/docker/clickhouse/config.xml:/etc/clickhouse-server/config.xml
             - ./posthog/docker/clickhouse/users.xml:/etc/clickhouse-server/users.xml
             - clickhouse-data:/var/lib/clickhouse
+        environment:
+            CLICKHOUSE_USER: posthog
+            CLICKHOUSE_PASSWORD: $CLICKHOUSE_PASSWORD
     zookeeper:
         extends:
             file: docker-compose.base.yml
@@ -84,6 +87,8 @@ services:
             OBJECT_STORAGE_ENDPOINT: http://objectstorage:19000
             OBJECT_STORAGE_ENABLED: true
             ENCRYPTION_SALT_KEYS: $ENCRYPTION_SALT_KEYS
+            CLICKHOUSE_USER: posthog
+            CLICKHOUSE_PASSWORD: $CLICKHOUSE_PASSWORD
         image: $REGISTRY_URL:$POSTHOG_APP_TAG
     web:
         extends:
@@ -102,12 +107,23 @@ services:
             OBJECT_STORAGE_ENDPOINT: http://objectstorage:19000
             OBJECT_STORAGE_ENABLED: true
             ENCRYPTION_SALT_KEYS: $ENCRYPTION_SALT_KEYS
+            CLICKHOUSE_USER: posthog
+            CLICKHOUSE_PASSWORD: $CLICKHOUSE_PASSWORD
+            TRUST_ALL_PROXIES: true
+            CORS_ALLOW_ALL_ORIGINS: true
         depends_on:
             - db
             - redis
             - clickhouse
             - kafka
             - objectstorage
+
+    property-defs-rs:
+        extends:
+            file: docker-compose.base.yml
+            service: property-defs-rs
+        depends_on:
+            - kafka
 
     plugins:
         extends:
@@ -125,6 +141,8 @@ services:
             CDP_REDIS_HOST: redis7
             CDP_REDIS_PORT: 6379
             ENCRYPTION_SALT_KEYS: $ENCRYPTION_SALT_KEYS
+            CLICKHOUSE_USER: posthog
+            CLICKHOUSE_PASSWORD: $CLICKHOUSE_PASSWORD
         depends_on:
             - db
             - redis
