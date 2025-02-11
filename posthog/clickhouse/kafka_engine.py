@@ -39,8 +39,9 @@ KAFKA_TIMESTAMP_MS_COLUMN = "_timestamp_ms DateTime64"
 
 
 def kafka_engine(topic: str, kafka_host: str | None = None, group="group1", serialization="JSONEachRow") -> str:
-    if kafka_host is None:
-        kafka_host = ",".join(settings.KAFKA_HOSTS_FOR_CLICKHOUSE)
+    #if kafka_host is None:
+    #    kafka_host = ",".join(settings.KAFKA_HOSTS_FOR_CLICKHOUSE)
+    kafka_host = ",".join(settings.KAFKA_HOSTS_FOR_CLICKHOUSE)
     return KAFKA_ENGINE.format(topic=topic, kafka_host=kafka_host, group=group, serialization=serialization)
 
 

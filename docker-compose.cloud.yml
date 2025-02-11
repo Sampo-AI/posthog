@@ -50,6 +50,11 @@ services:
             KAFKA_LOG_RETENTION_MS: 3600000
             KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
             KAFKA_LOG_RETENTION_HOURS: 1
+            KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://0.0.0.0:9094
+            KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://$KAFKA_URL_FOR_CLICKHOUSE
+            KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+        ports:
+            - '9094:9094'
         volumes:
             - kafka-data:/bitnami/kafka
 
@@ -70,6 +75,8 @@ services:
             CLICKHOUSE_PASSWORD: $CLICKHOUSE_PASSWORD
             CLICKHOUSE_HOST: $CLICKHOUSE_HOST
             CLICKHOUSE_SECURE: 'true'
+            KAFKA_URL_FOR_CLICKHOUSE: $KAFKA_URL_FOR_CLICKHOUSE
+            CLICKHOUSE_DISABLE_EXTERNAL_SCHEMAS: '1'
         image: $REGISTRY_URL:$POSTHOG_APP_TAG
     web:
         extends:
@@ -79,6 +86,7 @@ services:
         volumes:
             - ./compose:/compose
             - ./posthog/posthog/models/event/sql.py:/code/posthog/models/event/sql.py
+            - ./posthog/posthog/clickhouse/kafka_engine.py:/code/posthog/clickhouse/kafka_engine.py
         image: $REGISTRY_URL:$POSTHOG_APP_TAG
         environment:
             SENTRY_DSN: $SENTRY_DSN
@@ -93,6 +101,8 @@ services:
             CLICKHOUSE_PASSWORD: $CLICKHOUSE_PASSWORD
             CLICKHOUSE_HOST: $CLICKHOUSE_HOST
             CLICKHOUSE_SECURE: 'true'
+            KAFKA_URL_FOR_CLICKHOUSE: $KAFKA_URL_FOR_CLICKHOUSE
+            CLICKHOUSE_DISABLE_EXTERNAL_SCHEMAS: '1'
             TRUST_ALL_PROXIES: true
             CORS_ALLOW_ALL_ORIGINS: true
         depends_on:
@@ -128,6 +138,8 @@ services:
             CLICKHOUSE_PASSWORD: $CLICKHOUSE_PASSWORD
             CLICKHOUSE_HOST: $CLICKHOUSE_HOST
             CLICKHOUSE_SECURE: 'true'
+            KAFKA_URL_FOR_CLICKHOUSE: $KAFKA_URL_FOR_CLICKHOUSE
+            CLICKHOUSE_DISABLE_EXTERNAL_SCHEMAS: '1'
         depends_on:
             - db
             - redis

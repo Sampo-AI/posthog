@@ -24,6 +24,10 @@ echo "Clickhouse password:"
 read -r CLICKHOUSE_PASSWORD
 export CLICKHOUSE_PASSWORD=$CLICKHOUSE_PASSWORD
 
+echo "Kafka host for Clickhouse:"
+read -r KAFKA_URL_FOR_CLICKHOUSE
+export KAFKA_URL_FOR_CLICKHOUSE=$KAFKA_URL_FOR_CLICKHOUSE
+
 # Talk to the user
 echo "Welcome to the single instance PostHog installer 🦔"
 echo ""
@@ -165,9 +169,6 @@ import time
 def loop():
     print("Waiting for ClickHouse and Postgres to be ready")
     try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect(('clickhouse', 9000))
-        print("Clickhouse is ready")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect(('db', 5432))
         print("Postgres is ready")
