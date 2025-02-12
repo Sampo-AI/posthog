@@ -19,6 +19,12 @@ pub struct KafkaConfig {
 
     #[envconfig(default = "localhost:9092")]
     pub kafka_hosts: String,
+
+    #[envconfig(default = "sasl_user")]
+    pub kafka_sasl_user: String,
+
+    #[envconfig(default = "sasl_password")]
+    pub kafka_sasl_password: String,
 }
 
 #[derive(Envconfig, Clone)]

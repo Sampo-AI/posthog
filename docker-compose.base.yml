@@ -182,7 +182,7 @@ services:
             CAPTURE_MODE: recordings
 
     property-defs-rs:
-        image: ghcr.io/posthog/posthog/property-defs-rs:master
+        image: ghcr.io/posthog/posthog/property-defs-rs:sha-66d47fa
         build:
             context: posthog/rust/
             args:

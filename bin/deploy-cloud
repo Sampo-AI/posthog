@@ -16,6 +16,7 @@ ENCRYPTION_SALT_KEYS=$(openssl rand -hex 16)
 export ENCRYPTION_SALT_KEYS
 
 echo "Let's configure Clickhouse database."
+
 echo "Clickhouse host:"
 read -r CLICKHOUSE_HOST
 export CLICKHOUSE_HOST=$CLICKHOUSE_HOST
@@ -24,9 +25,23 @@ echo "Clickhouse password:"
 read -r CLICKHOUSE_PASSWORD
 export CLICKHOUSE_PASSWORD=$CLICKHOUSE_PASSWORD
 
+echo "Let's configure Kafka."
+
+echo "Kafka host:"
+read -r KAFKA_HOSTS
+export KAFKA_HOSTS=$KAFKA_HOSTS
+
 echo "Kafka host for Clickhouse:"
 read -r KAFKA_URL_FOR_CLICKHOUSE
 export KAFKA_URL_FOR_CLICKHOUSE=$KAFKA_URL_FOR_CLICKHOUSE
+
+echo "Kafka username:"
+read -r KAFKA_USER
+export KAFKA_USER=$KAFKA_USER
+
+echo "Kafka password:"
+read -r KAFKA_PASSWORD
+export KAFKA_PASSWORD=$KAFKA_PASSWORD
 
 # Talk to the user
 echo "Welcome to the single instance PostHog installer 🦔"

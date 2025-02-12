@@ -57,8 +57,11 @@ impl SingleTopicConsumer {
 
         if common_config.kafka_tls {
             client_config
-                .set("security.protocol", "ssl")
-                .set("enable.ssl.certificate.verification", "false");
+                .set("security.protocol", "sasl_ssl")
+                .set("enable.ssl.certificate.verification", "false")
+                .set("sasl.mechanism", "PLAIN")
+                .set("sasl.username", &common_config.kafka_sasl_user)
+                .set("sasl.password", &common_config.kafka_sasl_password);
         };
 
         let consumer: StreamConsumer = client_config.create()?;
