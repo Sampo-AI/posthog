@@ -9,15 +9,6 @@
 #
 
 services:
-    db:
-        extends:
-            file: docker-compose.base.yml
-            service: db
-        # Pin to postgres 12 until we have a process for pg_upgrade to postgres 15 for exsisting installations
-        image: ${DOCKER_REGISTRY_PREFIX:-}postgres:12-alpine
-        volumes:
-            - postgres-data:/var/lib/postgresql/data
-
     redis:
         extends:
             file: docker-compose.base.yml
@@ -55,6 +46,7 @@ services:
             KAFKA_SASL_USER: $KAFKA_USER
             KAFKA_SASL_PASSWORD: $KAFKA_PASSWORD
             KAFKA_URL_FOR_CLICKHOUSE: $KAFKA_URL_FOR_CLICKHOUSE
+            DATABASE_URL: 'postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:5432/posthog'
             CLICKHOUSE_DISABLE_EXTERNAL_SCHEMAS: '1'
         image: $REGISTRY_URL:$POSTHOG_APP_TAG
     web:
@@ -87,10 +79,10 @@ services:
             KAFKA_SASL_PASSWORD: $KAFKA_PASSWORD
             KAFKA_URL_FOR_CLICKHOUSE: $KAFKA_URL_FOR_CLICKHOUSE
             CLICKHOUSE_DISABLE_EXTERNAL_SCHEMAS: '1'
+            DATABASE_URL: 'postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:5432/posthog'
             TRUST_ALL_PROXIES: true
             CORS_ALLOW_ALL_ORIGINS: true
         depends_on:
-            - db
             - redis
             - objectstorage
 
@@ -99,7 +91,7 @@ services:
         restart: on-failure
         environment:
             RUST_LOG: info
-            DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
+            DATABASE_URL: 'postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:5432/posthog'
             SKIP_WRITES: 'false'
             SKIP_READS: 'false'
             FILTER_MODE: 'opt-out'
@@ -107,8 +99,6 @@ services:
             KAFKA_TLS: 'true'
             KAFKA_SASL_USER: $KAFKA_USER
             KAFKA_SASL_PASSWORD: $KAFKA_PASSWORD
-        depends_on:
-            - db
 
     plugins:
         extends:
@@ -137,8 +127,8 @@ services:
             KAFKA_SASL_PASSWORD: $KAFKA_PASSWORD
             KAFKA_URL_FOR_CLICKHOUSE: $KAFKA_URL_FOR_CLICKHOUSE
             CLICKHOUSE_DISABLE_EXTERNAL_SCHEMAS: '1'
+            DATABASE_URL: 'postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:5432/posthog'
         depends_on:
-            - db
             - redis
             - redis7
             - objectstorage
@@ -183,7 +173,10 @@ services:
             file: docker-compose.base.yml
             service: temporal
         environment:
-            - ENABLE_ES=false
+            - ENABLE_ES=true
+            - POSTGRES_USER=$POSTGRES_USER
+            - POSTGRES_PWD=$POSTGRES_PASSWORD
+            - POSTGRES_SEEDS=$POSTGRES_HOST
         ports:
             - 7233:7233
         volumes:
@@ -207,8 +200,6 @@ services:
         depends_on:
             temporal:
                 condition: service_started
-            db:
-                condition: service_healthy
 
     temporal-django-worker:
         command: /compose/temporal-django-worker
@@ -228,7 +219,6 @@ services:
             KAFKA_SASL_USER: $KAFKA_USER
             KAFKA_SASL_PASSWORD: $KAFKA_PASSWORD
         depends_on:
-            - db
             - redis
             - objectstorage
             - temporal
@@ -238,9 +228,7 @@ volumes:
     zookeeper-datalog:
     zookeeper-logs:
     objectstorage:
-    postgres-data:
     caddy-data:
     caddy-config:
     redis-data:
     redis7-data:
-    kafka-data:

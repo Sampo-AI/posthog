@@ -43,6 +43,18 @@ echo "Kafka password:"
 read -r KAFKA_PASSWORD
 export KAFKA_PASSWORD=$KAFKA_PASSWORD
 
+echo "Postgres host:"
+read -r POSTGRES_HOST
+export POSTGRES_HOST=$POSTGRES_HOST
+
+echo "Postgres username:"
+read -r POSTGRES_USER
+export POSTGRES_USER=$POSTGRES_USER
+
+echo "Postgres password:"
+read -r POSTGRES_PASSWORD
+export POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+
 # Talk to the user
 echo "Welcome to the single instance PostHog installer 🦔"
 echo ""
@@ -183,13 +195,6 @@ import time
 
 def loop():
     print("Waiting for ClickHouse and Postgres to be ready")
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect(('db', 5432))
-        print("Postgres is ready")
-    except ConnectionRefusedError as e:
-        time.sleep(5)
-        loop()
 
 loop()
 EOF
